@@ -1,0 +1,74 @@
+---
+title: "GLMMselect: Bayesian model selection for generalized linear mixed models"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+author: Shuangshuang Xu, Marco A. R. Ferreira, Erica M. Porter, and Christopher T. Franck
+vignette: >
+  %\VignetteIndexEntry{GLMMselect: Bayesian model selection for generalized linear mixed models}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(GLMMselect)
+```
+
+# Introduction
+
+The `GLMMselect` package provides a novel Bayesian model select approach for the analysis of Poisson and Binary data. `GLMMselect` contains functions to simultaneously select fixed effects and random effects for non-Gaussian data. Full details on the `GLMMselect` can be found in the manuscript (Xu et al. 202X).
+
+This vignette contains a toy example for count data and a case study presented in the manuscript (Xu et al. 202X) to illustrate how `GLMMselect` works. For toy example, the count data are simulated from Poisson GLMM with four candidate fixed effects and two types of random effects (spatial random effects and overdispersion random effects).
+
+
+# Functions
+
+The function `GLMMselect()` implemented in the `GLMMselect` package is described below:
+
+* Function `GLMMselect()` performs GLMMselect method (Xu et al. 202X) which solves model selection for generalized linear mixed models, given a numeric vector of binary or count data `Y`, a matrix of covariates `X`, a list of covariance matrices for random effects `Sigma`, a list of design matrices for random effects `Z`, the description of the error distribution `family`, and the prior for variance component of random effects `prior`. The function `GLMMselect()` returns the indices of fixed effects and random effects that are identified in the best model.  
+
+
+# Model
+
+The generalized linear mixed model used in the `GLMMselect` package is
+$$ g(\pmb{y})=X\pmb{\beta}+\sum_{q=1}^Q Z_q \pmb{\alpha}_q$$
+where
+
+* $g()$ is the link function.
+* $\pmb{y}$ is the vector of observations, either binary data or count data.
+* $X$ is the matrix of covariates.
+* $\pmb{\beta}$ is the vector of regression coefficients.
+* $Z_q$ is an incidence matrix relating the random effects $\pmb{\alpha}_q$.
+* $\pmb{\alpha}_q$ is a vector of random effects with covariance matrix $\tau_q \Sigma_q$. $\Sigma_q$ is a known semi-positive definite matrix, and $\tau_q$ is an unknown scalar. The common types of $\pmb{\alpha}_q$ can be spatial random effects, longitudinal random effects and overdispersion random effects. 
+
+Currently, `GLMMselect` package can analyze binary responses (`family = "bernoulli"`) and Poisson responses (`family = "poisson"`). The GLMMselect manuscript (Xu et al. 202X) provides details on the priors for $\pmb{\beta}$ and $\tau_q$, and FBF approach to train improper priors. 
+
+# Examples
+
+The `GLMMselect` function requires a vector of observations (either bernoulli or assumed Poisson distributed), a matrix of covariates, a list of design matrices for random effects, and a list of covariance matrices for random effects. 
+
+The vector of observations must be a numeric vector
+
+
+ First, the vector of observed phenotypes must be a numeric vector or a numeric n×1
+ matrix. BG2 does not allow the analysis of multiple phenotypes simultaneously. In the BG2 package, there are two simulated phenotype vectors. The first simulated phenotype vector comes from a Poisson generalized linear mixed model with both a kinship random effect and an overdispersion random effect. The data is assumed to have four replicates for each A. Thaliana ecotype. Here are the first five elements of the Poisson simulated vector of phenotypes:
+
+
+
+
+## Simulated Data
+
+## Results
+
+# Case study
+
+
+
