@@ -1,6 +1,6 @@
 Package: GLMMselect
 Title: Bayesian model selection method for generalized linear mixed models
-Version: 0.0.0.9000
+Version: 0.1.0
 Authors@R: c(
     person("Shuangshuang", "Xu", , "xshuangshuang@vt.edu", role = c("aut", "cre")),
     person("Marco", "Ferreira", , "marf@vt.edu", role = c("aut")),
