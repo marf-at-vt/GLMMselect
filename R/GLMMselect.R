@@ -253,7 +253,7 @@ FBF <- function(y_star, Xc, inv_v, Zc, Sigmac, prior,b, K){
 #' @param family A description of the error distribution to be used in the model.
 #' @param prior The prior distribution for variance component of random effects.
 #' @param offset This can be used to specify an a priori known component to be included in the linear predictor during fitting. This should be NULL or a numeric vector of length equal to the number of observations.
-#' @returns A list of the indices of covariates and random effects which are selected.
+#' @returns A list of the indices of covariates and random effects which are in the best model.
 #' @export
 GLMMselect <- function(Y, X, Sigma, Z, family, prior, offset=NULL){
   if(!is.matrix(X)){
@@ -298,3 +298,7 @@ GLMMselect <- function(Y, X, Sigma, Z, family, prior, offset=NULL){
 
 
 }
+
+
+
+

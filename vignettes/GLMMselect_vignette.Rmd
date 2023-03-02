@@ -55,20 +55,74 @@ Currently, `GLMMselect` package can analyze binary responses (`family = "bernoul
 
 The `GLMMselect` function requires a vector of observations (either bernoulli or assumed Poisson distributed), a matrix of covariates, a list of design matrices for random effects, and a list of covariance matrices for random effects. 
 
-The vector of observations must be a numeric vector
+The vector of observations must be a numeric $n \times 1$ vector. In the GLMMselect package, there is an example simulated from the Poisson generalized linear mixed model with four candidate covariates, a vector of spatial random effects, and a vector of overdispersion random effects. Here are the first five elements of the Poisson simulated vector of observations:
 
+```{r}
+data("Y")
+Y[1:5]
+```
 
- First, the vector of observed phenotypes must be a numeric vector or a numeric n×1
- matrix. BG2 does not allow the analysis of multiple phenotypes simultaneously. In the BG2 package, there are two simulated phenotype vectors. The first simulated phenotype vector comes from a Poisson generalized linear mixed model with both a kinship random effect and an overdispersion random effect. The data is assumed to have four replicates for each A. Thaliana ecotype. Here are the first five elements of the Poisson simulated vector of phenotypes:
+The covariate matrix contains all candidate covariates. Each column corresponds to a candidate covariate. Each row corresponds to the a observation. In this example, the covariates matrix contains four candidate covariates. The covariates in the first two columns are in the true model. Here are the first five rows of the covariate matrix:
 
+```{r}
+data("X")
+X[1:5,]
+```
 
+The design matrices for candidate random effects are input in the list type. In this example, this is a list of two design matrices for two types of random effects. The first component is for spatial random effects. The second component is for overdispersion random effects.
 
+```{r}
+data("Z")
+Z[[1]][1:5,1:5]
+Z[[2]][1:5,1:5]
+```
 
-## Simulated Data
+The covariance matrices for candidate random effects are also in the list. In this example, this is a list of two covariance matrices for two types of random effects. The first component is for spatial random effects. The second componet is for overdispersion random effects.
 
-## Results
+```{r}
+data("Sigma")
+Sigma[[1]][1:5,1:5]
+Sigma[[2]][1:5,1:5]
+```
+
+# Simulation study
+
+The function `GLMMselect` implements the Bayesian model selection method for generalized linear mixed models with either Poisson or Bernoulli distributed responses. This function takes inputs of the vector of binary or count observations, the matrix of candidate covariates, the list of covariance matrices for candidate random effects, the list of design matrices for candidate random effects, the distributional family the response follows, the prior distribution for variance component of random effects, and a vector of priori known components to be included. The full details are available in the manuscript (Xu et al. 202X). 
+
+We illustrate `GLMMselect` with Poisson count data, and using approximate reference (AR) prior for variance components of random effects.
+
+```{r}
+Model_selection_output <- GLMMselect(Y=Y, X=X, Sigma=Sigma, Z=Z, family="poisson", prior="AR", offset=NULL)
+Model_selection_output
+```
+
+`GLMMselect` outputs the indices of the covariates and the indices of the random effects which are in the best model. The true model contains the first two covariates and spatial random effects. `GLMMselect` identifies these two covariates and the spatial random effects. 
+
 
 # Case study
+
+Here is a case study to help illustrate how to use `GLMMselect`. This dataset provides the number of male lip cancer cases in the 56 counties of Scotland during the period 1975-1980, as well as the percentage of the work force employed in agriculture, fishing, or forestry (AFF) as a covariate. The model we consider is
+$$
+y_i|\mu_i \stackrel{ind}{\sim} \mbox{Poisson}(\mu_i), \ \ \ i=1\dots 56, \\
+\log(\mu_i) = \log(n_i)+\pmb{x}_i^T\pmb{\beta}+\alpha_{1i}+\alpha_{2i}, \\
+\pmb{\alpha}_1 \sim N(\pmb{0},\tau_1 \Sigma_1), \\
+\pmb{\alpha}_2 \sim N(\pmb{0}, \tau_2 \Sigma_2). 
+$$
+
+$n_i$ is the expected number of lip cancer cases in the $i^{th}$ county, which are assumed to be known constants. $\pmb{\alpha}_1$ is a vector of spatial random effects. $\pmb{\alpha}_2$ is a vector of overdispersion random effects.
+
+We illustrate `GLMMselect` with lip cancer data, and using half Cauchy (HC) prior for variance components of random effects.
+
+```{r}
+lip_cancer_output <- GLMMselect(Y=lipcancer_Y, X=lipcancer_X, Sigma=lipcancer_Sigma, Z=lipcancer_Z, family="poisson", prior="HC", offset=lipcancer_offset)
+lip_cancer_output
+```
+
+
+
+
+
+
 
 
 
