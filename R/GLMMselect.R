@@ -256,9 +256,50 @@ FBF <- function(y_star, Xc, inv_v, Zc, Sigmac, prior,b, K){
 #' @returns A list of the indices of covariates and random effects which are in the best model.
 #' @export
 GLMMselect <- function(Y, X, Sigma, Z, family, prior, offset=NULL){
-  if(!is.matrix(X)){
-    X <- as.matrix(X)
+
+  if(sum(family %in% c("poisson","bernoulli")) == 0){
+    stop("family must be either poisson or bernoulli.")
   }
+
+  if(!is.numeric(Y)){
+    stop("Y has to be numeric.")
+  }
+
+  if(!is.matrix(X)){
+    stop("X has to be a matrix object.")
+  }
+
+  if(!is.numeric(X)){
+    stop("X has to contain numeric values.")
+  }
+
+  if(sum(prior %in% c("AR","HC")) == 0){
+    stop("Prior must be either AR or HC.")
+  }
+
+  if(family == "bernoulli"){
+    if(!is.null(offset)){
+      stop("Offset is only for Poisson data.")
+    }
+  }
+
+  if(!is.list(Sigma)){
+    stop("Sigma has to be a list object.")
+  }
+
+  if(!is.list(Z)){
+    stop("Z has to be a list object.")
+  }
+
+  if(sum(mapply(is.numeric, Sigma))==0){
+    stop("Sigma must be numeric.")
+  }
+
+  if(sum(mapply(is.numeric, Z))==0){
+    stop("Z must be numeric.")
+  }
+
+
   N <- length(Y)
   X1 <- cbind(1,X)
   K <- ncol(X)
