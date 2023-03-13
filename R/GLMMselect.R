@@ -48,7 +48,6 @@ pseudo_likelihood <- function(Y, X, Sigma, Z, family, offset=NULL){
   }
   Beta_temp <- matrix(0, nrow = ncol(X1), ncol = 1)
 
-
   while(sum(mapply(function(x,y){abs(x-y)>0.0001},Kappa, Kappa_temp))>=1 | max(abs(Beta-Beta_temp))>0.0001){
 
     Kappa_temp <- Kappa
@@ -82,11 +81,12 @@ pseudo_likelihood <- function(Y, X, Sigma, Z, family, offset=NULL){
       l <- (+0.5*sum(log(D_inv))   #log(det(H))
             -0.5*determinant(t(X1.tilde)%*%(D_inv*X1.tilde), logarithm=TRUE)$modulus[1] #t(X) %*% inv_H %*% X = t(X.tilde) %*% D_inv %*% X.tilde
             -0.5*sum(re.tilde^2*D_inv)) # (y-Xbeta)invH(y-Xbeta)
-      return(l)
+      return(-l)
     }
 
-    ts <- stats::optim(par=rep(0.1,n_rf), fn=logl, lower = rep(0,n_rf), upper = rep(50,n_rf), method = "L-BFGS-B", control = list(fnscale=-1))$par
-    Kappa <- as.list(ts)
+    ts <- stats::optim(par=rep(0.1,n_rf), fn=logl, lower = rep(0,n_rf), upper = rep(50,n_rf), method = "L-BFGS-B",hessian = T)
+    Kappa <- as.list(ts$par)
+    Hessian <- ts$hessian
 
     H <- matrix(rowSums(mapply(function(x,y,z){x*z%*%y%*%t(z)}, Kappa, Sigma, Z)), ncol=n, nrow=n)
     diag(H) <- diag(H)+inv_V_vector
@@ -127,7 +127,10 @@ pseudo_likelihood <- function(Y, X, Sigma, Z, family, offset=NULL){
   inv_V_vector <- par_est$inv_V_vector
   y_star <- par_est$y_star
 
-  return(list(y_star=y_star, inv_v=inv_V_vector))
+  est <- c(as.vector(Beta)[-1], unlist(Kappa))
+  sd <- c(sqrt(diag(inv_xdx))[-1], sqrt(1/diag(Hessian)))
+
+  return(list(y_star=y_star, inv_v=inv_V_vector, est=est, sd=sd))
 }
 
 
@@ -309,6 +312,9 @@ GLMMselect <- function(Y, X, Sigma, Z, family, prior, offset=NULL){
   PL_est <- pseudo_likelihood(Y=Y, X=X, Sigma=Sigma, Z=Z, family=family, offset=offset)
 
   postprob <- matrix(NA, nrow = 2^Q, ncol = 2^K)
+  PosteriorProb <- matrix(NA, nrow = 2^Q*2^K, ncol = (K+Q+1))
+  colnames(PosteriorProb) <- c(paste("x",1:K,sep = ""),paste("r",1:Q,sep = ""),"p")
+
 
   binary_fixed <- rep(list(0:1), K)
   binary_fixed <- as.matrix(expand.grid(binary_fixed))
@@ -322,12 +328,22 @@ GLMMselect <- function(Y, X, Sigma, Z, family, prior, offset=NULL){
       Sigmac <- Sigma[which(binary_random[q,]==1)]
       Zc <- Z[which(binary_random[q,]==1)]
       postprob[q,k] <- FBF(y_star=PL_est$y_star, Xc=Xc, inv_v=PL_est$inv_v, Zc=Zc, Sigmac=Sigmac, prior=prior, b=b, K=K)
-
     }
   }
 
   maxx <- max(postprob)
   postprob <- exp(postprob-maxx)/sum(exp(postprob-maxx))
+
+  j=1
+  for(q in 1:2^Q){
+    for(k in 1:2^K){
+      PosteriorProb[j,1:K] <- binary_fixed[k,]
+      PosteriorProb[j,(K+1):(K+Q)] <- binary_random[q,]
+      PosteriorProb[j,K+Q+1] <- postprob[q,k]
+      j = j+1
+    }
+  }
+
   posterior_random <- rowSums(postprob)
   posterior_fix <- colSums(postprob)
 
@@ -335,8 +351,42 @@ GLMMselect <- function(Y, X, Sigma, Z, family, prior, offset=NULL){
   fix_position <- which(binary_fixed[which.max(posterior_fix),]==1)
   random_position <- which(binary_random[which.max(posterior_random),]==1)
 
-  return(list(covariate_inclusion=fix_position, random_effect_inclusion=random_position))
+  ###output###
+  #bestmodel
+  BestModel <- list()
+  names(fix_position)<-NULL
+  names(random_position)<-NULL
+  BestModel$covariate_inclusion <- fix_position
+  BestModel$random_effect_inclusion <- random_position
 
+  #table of all models' posterior probabilities
+  PosteriorProb <- PosteriorProb[order(PosteriorProb[,K+Q+1],decreasing=TRUE),]
+  PosteriorProb <- as.data.frame(PosteriorProb)
+  PosteriorProb$p <- round(PosteriorProb$p,2)
+
+  indices <- apply(PosteriorProb[,1:(K+Q)],2,function(x){which(x==1)})
+  margin_prob <- apply(indices,2,function(x){sum(PosteriorProb[x,K+Q+1])})
+  #table for fixed effects
+  FixedEffect <- matrix(NA, ncol = 3, nrow = K)
+  rownames(FixedEffect) <- paste("x",1:K,sep = "")
+  colnames(FixedEffect) <- c("Est","SD","p")
+  FixedEffect[,1] <- PL_est$est[1:K]
+  FixedEffect[,2] <- PL_est$sd[1:K]
+  FixedEffect[,3] <- margin_prob[1:K]
+  FixedEffect[,1:2] <- round(FixedEffect[,1:2],3)
+  FixedEffect[,3] <- round(FixedEffect[,3],2)
+
+  #table for random effects
+  RandomEffect <- matrix(NA, ncol = 3, nrow = Q)
+  rownames(RandomEffect) <- paste("r",1:Q,sep = "")
+  colnames(RandomEffect) <- c("Est","SD","p")
+  RandomEffect[,1] <- PL_est$est[(1+K):(Q+K)]
+  RandomEffect[,2] <- PL_est$sd[(1+K):(Q+K)]
+  RandomEffect[,3] <- margin_prob[(1+K):(Q+K)]
+  RandomEffect[,1:2] <- round(RandomEffect[,1:2],3)
+  RandomEffect[,3] <- round(RandomEffect[,3],2)
+
+  return(list(BestModel=BestModel, PosteriorProb=PosteriorProb, FixedEffect=FixedEffect, RandomEffect=RandomEffect))
 
 }
 
