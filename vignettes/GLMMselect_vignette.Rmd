@@ -33,7 +33,7 @@ This vignette contains a toy example for count data and a case study presented i
 
 The function `GLMMselect()` implemented in the `GLMMselect` package is described below:
 
-* Function `GLMMselect()` performs the GLMMselect method (Xu et al. 202X) which performs model selection for generalized linear mixed models, given a numeric vector of binary or count data `Y`, a matrix of covariates `X`, a list of covariance matrices for random effects `Sigma`, a list of design matrices for random effects `Z`, the description of the error distribution `family`, and the prior for variance component of random effects `prior`. The function `GLMMselect()` returns a list of the indices of fixed effects and random effects that are identified in the best model, a table of all models' posterior probabilities which are sorted decreasingly, a table for fixed effects' inference, and a table for random effects' inference which includes point estimates and standard deviations for coefficients, and marginal posterior probabilities for each effect. 
+* Function `GLMMselect()` performs the GLMMselect method (Xu et al. 202X) which performs model selection for generalized linear mixed models, given a numeric vector of binary or count data `Y`, a matrix of covariates `X`, a list of covariance matrices for random effects `Sigma`, a list of design matrices for random effects `Z`, the description of the error distribution `family`, and the prior for variance component of random effects `prior`. The function `GLMMselect()` returns a list of the indices of fixed effects and random effects that are identified in the best model, a table of all models' posterior probabilities which are sorted decreasingly, a table for fixed effects' inference, and a table for random effects' inference which includes point estimates and standard deviations for coefficients, and marginal posterior inclusion probabilities for each effect. 
 
 
 # Model
@@ -87,7 +87,7 @@ Sigma[[2]][1:5,1:5]
 
 # Example: Analysis of the simulated dataset
 
-The function `GLMMselect` implements a Bayesian model selection method for generalized linear mixed models with either Poisson or Bernoulli distributed responses. This function takes as inputs the vector of binary or count observations, the matrix of candidate covariates, the list of covariance matrices for candidate random effects, the list of design matrices for candidate random effects, the distributional family the response follows, the prior distribution for variance component of random effects, and a vector of priori known components to be included. The full details are available in the manuscript (Xu et al. 202X). <span style="color:red">The vector of priori known components is the offset argument here.</span> 
+The function `GLMMselect` implements a Bayesian model selection method for generalized linear mixed models with either Poisson or Bernoulli distributed responses. This function takes as inputs the vector of binary or count observations, the matrix of candidate covariates, the list of covariance matrices for candidate random effects, the list of design matrices for candidate random effects, the distributional family the response follows, the prior distribution for variance component of random effects, and a known offset component to be included in the linear predictor during fitting. The full details are available in the manuscript (Xu et al. 202X). 
 
 In this example, we use `GLMMselect` to analyze Poisson count data with an approximate reference (AR) prior for the variance components of random effects.
 
@@ -99,7 +99,7 @@ Model_selection_output$FixedEffect
 Model_selection_output$RandomEffect
 ```
 
-`GLMMselect` outputs the indices of the covariates and the indices of the random effects which are in the best model. The true model contains the first two covariates and spatial random effects. `GLMMselect` identifies these two covariates and the spatial random effects. 
+`GLMMselect` outputs the indices of the covariates and the indices of the random effects which are in the best model. The true model contains the first two covariates and spatial random effects. `GLMMselect` correctly identifies these two covariates and the spatial random effects. 
 
 
 # Example: Analysis of Scotland lip cancer data

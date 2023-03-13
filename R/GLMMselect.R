@@ -374,7 +374,7 @@ GLMMselect <- function(Y, X, Sigma, Z, family, prior, offset=NULL){
   FixedEffect[,2] <- PL_est$sd[1:K]
   FixedEffect[,3] <- margin_prob[1:K]
   FixedEffect[,1:2] <- round(FixedEffect[,1:2],3)
-  FixedEffect[,3] <- round(FixedEffect[,3],2)
+  FixedEffect[,3] <- round(FixedEffect[,3],3)
 
   #table for random effects
   RandomEffect <- matrix(NA, ncol = 3, nrow = Q)
@@ -384,7 +384,7 @@ GLMMselect <- function(Y, X, Sigma, Z, family, prior, offset=NULL){
   RandomEffect[,2] <- PL_est$sd[(1+K):(Q+K)]
   RandomEffect[,3] <- margin_prob[(1+K):(Q+K)]
   RandomEffect[,1:2] <- round(RandomEffect[,1:2],3)
-  RandomEffect[,3] <- round(RandomEffect[,3],2)
+  RandomEffect[,3] <- round(RandomEffect[,3],3)
 
   return(list(BestModel=BestModel, PosteriorProb=PosteriorProb, FixedEffect=FixedEffect, RandomEffect=RandomEffect))
 
