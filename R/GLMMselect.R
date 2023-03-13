@@ -362,7 +362,7 @@ GLMMselect <- function(Y, X, Sigma, Z, family, prior, offset=NULL){
   #table of all models' posterior probabilities
   PosteriorProb <- PosteriorProb[order(PosteriorProb[,K+Q+1],decreasing=TRUE),]
   PosteriorProb <- as.data.frame(PosteriorProb)
-  PosteriorProb$p <- round(PosteriorProb$p,2)
+  PosteriorProb$p <- round(PosteriorProb$p,3)
 
   indices <- apply(PosteriorProb[,1:(K+Q)],2,function(x){which(x==1)})
   margin_prob <- apply(indices,2,function(x){sum(PosteriorProb[x,K+Q+1])})
