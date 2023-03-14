@@ -256,9 +256,10 @@ FBF <- function(y_star, Xc, inv_v, Zc, Sigmac, prior,b, K){
 #' @param family A description of the error distribution to be used in the model.
 #' @param prior The prior distribution for variance component of random effects.
 #' @param offset This can be used to specify an a priori known component to be included in the linear predictor during fitting. This should be NULL or a numeric vector of length equal to the number of observations.
+#' @param NumofModel The number of models with the largest posterior probabilities being printed out.
 #' @returns A list of the indices of covariates and random effects which are in the best model.
 #' @export
-GLMMselect <- function(Y, X, Sigma, Z, family, prior, offset=NULL){
+GLMMselect <- function(Y, X, Sigma, Z, family, prior, offset=NULL, NumofModel=10){
 
   if(sum(family %in% c("poisson","bernoulli")) == 0){
     stop("family must be either poisson or bernoulli.")
@@ -359,7 +360,7 @@ GLMMselect <- function(Y, X, Sigma, Z, family, prior, offset=NULL){
   BestModel$covariate_inclusion <- fix_position
   BestModel$random_effect_inclusion <- random_position
 
-  #table of all models' posterior probabilities
+  #table of models' posterior probabilities
   PosteriorProb <- PosteriorProb[order(PosteriorProb[,K+Q+1],decreasing=TRUE),]
   PosteriorProb <- as.data.frame(PosteriorProb)
   PosteriorProb$p <- round(PosteriorProb$p,3)
@@ -385,6 +386,11 @@ GLMMselect <- function(Y, X, Sigma, Z, family, prior, offset=NULL){
   RandomEffect[,3] <- margin_prob[(1+K):(Q+K)]
   RandomEffect[,1:2] <- round(RandomEffect[,1:2],3)
   RandomEffect[,3] <- round(RandomEffect[,3],3)
+
+
+  if(NumofModel <= (2^K*2^Q)){
+    PosteriorProb <- PosteriorProb[1:NumofModel,]
+  }
 
   return(list(BestModel=BestModel, PosteriorProb=PosteriorProb, FixedEffect=FixedEffect, RandomEffect=RandomEffect))
 

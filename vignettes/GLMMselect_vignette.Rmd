@@ -33,7 +33,7 @@ This vignette contains a toy example for count data and a case study presented i
 
 The function `GLMMselect()` implemented in the `GLMMselect` package is described below:
 
-* Function `GLMMselect()` performs the GLMMselect method (Xu et al. 202X) which performs model selection for generalized linear mixed models, given a numeric vector of binary or count data `Y`, a matrix of covariates `X`, a list of covariance matrices for random effects `Sigma`, a list of design matrices for random effects `Z`, the description of the error distribution `family`, and the prior for variance component of random effects `prior`. The function `GLMMselect()` returns a list of the indices of fixed effects and random effects that are identified in the best model, a table of all models' posterior probabilities which are sorted decreasingly, a table for fixed effects' inference, and a table for random effects' inference which includes point estimates and standard deviations for coefficients, and marginal posterior inclusion probabilities for each effect. 
+* Function `GLMMselect()` performs the GLMMselect method (Xu et al. 202X) which performs model selection for generalized linear mixed models, given a numeric vector of binary or count data `Y`, a matrix of covariates `X`, a list of covariance matrices for random effects `Sigma`, a list of design matrices for random effects `Z`, the description of the error distribution `family`, the prior for variance component of random effects `prior`, and the number of models with the largest posterior probabilities which are included in the output `NumofModel`. The function `GLMMselect()` returns a list of the indices of fixed effects and random effects that are identified in the best model, a table of models' posterior probabilities which are sorted decreasingly, a table for fixed effects' inference, and a table for random effects' inference which includes point estimates and standard deviations for coefficients, and marginal posterior inclusion probabilities for each effect. 
 
 
 # Model
@@ -94,7 +94,7 @@ In this example, we use `GLMMselect` to analyze Poisson count data with an appro
 ```{r}
 Model_selection_output <- GLMMselect(Y=Y, X=X, Sigma=Sigma, Z=Z, family="poisson", prior="AR", offset=NULL)
 Model_selection_output$BestModel
-Model_selection_output$PosteriorProb[1:5,]
+Model_selection_output$PosteriorProb
 Model_selection_output$FixedEffect
 Model_selection_output$RandomEffect
 ```
