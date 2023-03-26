@@ -24,36 +24,36 @@ library(GLMMselect)
 
 # Introduction
 
-The `GLMMselect` package provides a novel Bayesian model select approach for the analysis of Poisson and binary data. `GLMMselect` contains functions to simultaneously select fixed effects and random effects for non-Gaussian data. Full details on the `GLMMselect` can be found in the manuscript (Xu et al. 202X).
+The `GLMMselect` package provides a novel Bayesian model selection approach for the analysis of Poisson and binary data. `GLMMselect` contains functions to simultaneously select fixed effects and random effects for non-Gaussian data. In the `GLMMselect` package, we use pseudo likelihood method to solve the problem that the random effects cannot be analytically integrated out of GLMMs. In addition, we develop a fractional Bayes factor (FBF) approach to obtain posterior probabilities of the competing models. Full details on the methods implemented in `GLMMselect` can be found in the manuscript (Xu et al. 202X).
 
-This vignette contains a toy example for count data and a case study presented in the manuscript (Xu et al. 202X) to illustrate how `GLMMselect` works. For the toy example, the count data are simulated from Poisson GLMM with four candidate fixed effects and two types of random effects (spatial random effects and overdispersion random effects).
+This vignette contains a estimated example for count data and a case study presented in the manuscript (Xu et al. 202X) to illustrate how `GLMMselect` works. For the simulated example, the count data are simulated from Poisson GLMM with four candidate fixed effects and two types of random effects (spatial random effects and overdispersion random effects).
 
 
-# Functions
+# Function
 
 The function `GLMMselect()` implemented in the `GLMMselect` package is described below:
 
-* Function `GLMMselect()` performs the GLMMselect method (Xu et al. 202X) which performs model selection for generalized linear mixed models, given a numeric vector of binary or count data `Y`, a matrix of covariates `X`, a list of covariance matrices for random effects `Sigma`, a list of design matrices for random effects `Z`, the description of the error distribution `family`, the prior for variance component of random effects `prior`, and the number of models with the largest posterior probabilities which are included in the output `NumofModel`. The function `GLMMselect()` returns a list of the indices of fixed effects and random effects that are identified in the best model, a table of models' posterior probabilities which are sorted decreasingly, a table for fixed effects' inference, and a table for random effects' inference which includes point estimates and standard deviations for coefficients, and marginal posterior inclusion probabilities for each effect. 
+* Function `GLMMselect()` performs the ARM and HCM (Xu et al. 202X) which performs model selection for generalized linear mixed models, given a numeric vector of binary or count data `Y`, a matrix of covariates `X`, a list of covariance matrices for random effects `Sigma`, a list of design matrices for random effects `Z`, the description of the error distribution `family`, and the prior for variance component of random effects `prior`. Arguments `pip_fixed` and `pip_random` are the thresholds that if the posterior inclusion probability of fixed effects or random effects is larger than `pip_fixed` or `pip_random`, the corresponding fixed effects and random effects will be included in the best model. In addition, the argument `NumofModel` can adjust the number of models with the largest posterior probabilities which are printed out in the output. The function `GLMMselect()` returns a list of the indices of fixed effects and random effects that are identified in the best model, a table of models' posterior probabilities (MPP) which are sorted in decreasing order, a table for fixed effects' inference, and a table for random effects' inference which includes point estimates and standard deviations for coefficients, and posterior inclusion probabilities (PIP) for each effect. 
 
 
 # Model
 
 The generalized linear mixed model used in the `GLMMselect` package is
-$$ g(\pmb{y})=X\pmb{\beta}+\sum_{q=1}^Q Z_q \pmb{\alpha}_q$$
+$$ g(\pmb{Y})=X\pmb{\beta}+\sum_{q=1}^Q Z_q \pmb{\alpha}_q,$$
 where
 
 * $g()$ is the link function.
-* $\pmb{y}$ is the vector of observations, either binary data or count data.
+* $\pmb{Y}$ is an $n \times 1$ vector of observations, either binary data or count data.
 * $X$ is the matrix of covariates.
-* $\pmb{\beta}$ is the vector of regression coefficients.
+* $\pmb{\beta}$ is the $p \times 1$ vector of regression coefficients.
 * $Z_q$ is an incidence matrix relating the vector of random effects $\pmb{\alpha}_q$ to the observations.
 * $\pmb{\alpha}_q$ is a vector of random effects with covariance matrix $\tau_q \Sigma_q$. $\Sigma_q$ is a known semi-positive definite matrix, and $\tau_q$ is an unknown scalar. The common types of $\pmb{\alpha}_q$ can be spatial random effects, longitudinal random effects and overdispersion random effects. 
 
-Currently, `GLMMselect` package can analyze binary responses (`family = "bernoulli"`) and Poisson responses (`family = "poisson"`). The GLMMselect manuscript (Xu et al. 202X) provides details on the priors for $\pmb{\beta}$ and $\tau_q$, as well as details about the FBF approach used by GLMMselect. 
+Currently, the `GLMMselect` package can analyze binary responses (`family = "bernoulli"`) and Poisson responses (`family = "poisson"`). The manuscript that develops the methods in GLMMselect (Xu et al. 202X) provides details on the priors for $\pmb{\beta}$ and $\tau_q$, as well as details about the FBF approach used by GLMMselect. 
 
 # Examples
 
-The `GLMMselect` function requires a vector of observations (either bernoulli or assumed Poisson distributed), a matrix of covariates, a list of design matrices for random effects, and a list of covariance matrices for random effects. 
+The `GLMMselect()` function requires a vector of observations (either Bernoulli or assumed Poisson distributed), a matrix of covariates, a list of design matrices for random effects, and a list of covariance matrices for random effects. 
 
 The vector of observations must be a numeric $n \times 1$ vector. In the GLMMselect package, there is an example simulated from the Poisson generalized linear mixed model with four candidate covariates, a vector of spatial random effects, and a vector of overdispersion random effects. Here are the first five elements of the Poisson simulated vector of observations:
 
@@ -62,7 +62,7 @@ data("Y")
 Y[1:5]
 ```
 
-The covariate matrix contains all candidate covariates. Each column corresponds to a candidate covariate. Each row corresponds to the a observation. In this example, the covariates matrix contains four candidate covariates. The covariates in the first two columns are in the true model. Here are the first five rows of the covariate matrix:
+The covariate matrix passed to the function contains all candidate covariates. Each column corresponds to a candidate covariate. Each row corresponds to an observation. In this example, the covariate matrix contains four candidate covariates. The covariates in the first two columns are in the true model. Here are the first five rows of the covariate matrix:
 
 ```{r}
 data("X")
@@ -85,21 +85,22 @@ Sigma[[1]][1:5,1:5]
 Sigma[[2]][1:5,1:5]
 ```
 
+Data `Y`,`X`, `Sigma`, and `Z` above are attached in the `GLMMselect` package. 
+
 # Example: Analysis of the simulated dataset
-
-The function `GLMMselect` implements a Bayesian model selection method for generalized linear mixed models with either Poisson or Bernoulli distributed responses. This function takes as inputs the vector of binary or count observations, the matrix of candidate covariates, the list of covariance matrices for candidate random effects, the list of design matrices for candidate random effects, the distributional family the response follows, the prior distribution for variance component of random effects, and a known offset component to be included in the linear predictor during fitting. The full details are available in the manuscript (Xu et al. 202X). 
-
+ 
 In this example, we use `GLMMselect` to analyze Poisson count data with an approximate reference (AR) prior for the variance components of random effects.
 
 ```{r}
-Model_selection_output <- GLMMselect(Y=Y, X=X, Sigma=Sigma, Z=Z, family="poisson", prior="AR", offset=NULL)
+Model_selection_output <- GLMMselect(Y=Y, X=X, Sigma=Sigma, Z=Z, 
+                                     family="poisson", prior="AR", offset=NULL)
 Model_selection_output$BestModel
 Model_selection_output$PosteriorProb
 Model_selection_output$FixedEffect
 Model_selection_output$RandomEffect
 ```
 
-`GLMMselect` outputs the indices of the covariates and the indices of the random effects which are in the best model. The true model contains the first two covariates and spatial random effects. `GLMMselect` correctly identifies these two covariates and the spatial random effects. 
+`GLMMselect()` outputs the indices of the covariates and the indices of the random effects which are in the best model. The true model contains the first two covariates and spatial random effects. `GLMMselect` correctly identifies these two covariates and the spatial random effects. 
 
 
 # Example: Analysis of Scotland lip cancer data
@@ -114,15 +115,27 @@ $$
 
 $n_i$ is the expected number of lip cancer cases in the $i^{th}$ county, which are assumed to be known constants. $\pmb{\alpha}_1$ is a vector of spatial random effects. $\pmb{\alpha}_2$ is a vector of overdispersion random effects.
 
-In this example, we use `GLMMselect` to analyze lip cancer data with a half Cauchy (HC) prior for variance components of random effects.  
+In this example, we use `GLMMselect` to analyze lip cancer data with a half Cauchy (HC) prior for variance components of random effects. Data `lipcancer_Y`,`lipcancer_X`, `lipcancer_Sigma`, and `lipcancer_Z` are attached in the `GLMMselect` package. 
 
 ```{r}
-lip_cancer_output <- GLMMselect(Y=lipcancer_Y, X=lipcancer_X, Sigma=lipcancer_Sigma, Z=lipcancer_Z, family="poisson", prior="HC", offset=lipcancer_offset)
+lip_cancer_output <- GLMMselect(Y=lipcancer_Y, X=lipcancer_X, Sigma=lipcancer_Sigma, Z=lipcancer_Z,
+                                family="poisson", prior="HC", offset=lipcancer_offset)
 lip_cancer_output$BestModel
 lip_cancer_output$PosteriorProb
 lip_cancer_output$FixedEffect
 lip_cancer_output$RandomEffect
 ```
+
+
+# See more
+
+`ref.ICAR` provides an objective Bayesian approach for modeling spatially correlated areal data using an intrinsic conditional autoregressive prior on a vector of spatial random effects. Does ref.ICAR package do model selection for Gaussian data?
+
+# Reference
+
+Xu, Shuangshuang, Ferreira, M. A. R., Porter, E. M., and Franck, C. T. (202X). GLMMselect: Bayesian Model Selection for Generalized Linear Mixed Models, Biometrics under review.
+
+
 
 
 

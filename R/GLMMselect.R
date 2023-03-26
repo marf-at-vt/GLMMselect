@@ -257,9 +257,11 @@ FBF <- function(y_star, Xc, inv_v, Zc, Sigmac, prior,b, K){
 #' @param prior The prior distribution for variance component of random effects.
 #' @param offset This can be used to specify an a priori known component to be included in the linear predictor during fitting. This should be NULL or a numeric vector of length equal to the number of observations.
 #' @param NumofModel The number of models with the largest posterior probabilities being printed out.
+#' @param pip_fixed The cutoff that if the posterior inclusion probability of fixed effects is larger than it, the fixed effects will be included in the best model.
+#' @param pip_random The cutoff that if the posterior inclusion probability of random effects is larger than it, the random effects will be included in the best model.
 #' @returns A list of the indices of covariates and random effects which are in the best model.
 #' @export
-GLMMselect <- function(Y, X, Sigma, Z, family, prior, offset=NULL, NumofModel=10){
+GLMMselect <- function(Y, X, Sigma, Z, family, prior, offset=NULL, NumofModel=10, pip_fixed=0.9, pip_random=0.5){
 
   if(sum(family %in% c("poisson","bernoulli")) == 0){
     stop("family must be either poisson or bernoulli.")
@@ -314,7 +316,7 @@ GLMMselect <- function(Y, X, Sigma, Z, family, prior, offset=NULL, NumofModel=10
 
   postprob <- matrix(NA, nrow = 2^Q, ncol = 2^K)
   PosteriorProb <- matrix(NA, nrow = 2^Q*2^K, ncol = (K+Q+1))
-  colnames(PosteriorProb) <- c(paste("x",1:K,sep = ""),paste("r",1:Q,sep = ""),"p")
+  colnames(PosteriorProb) <- c(paste("x",1:K,sep = ""),paste("r",1:Q,sep = ""),"MPP")
 
 
   binary_fixed <- rep(list(0:1), K)
@@ -345,32 +347,26 @@ GLMMselect <- function(Y, X, Sigma, Z, family, prior, offset=NULL, NumofModel=10
     }
   }
 
-  posterior_random <- rowSums(postprob)
-  posterior_fix <- colSums(postprob)
+  #posterior_random <- rowSums(postprob)
+  #posterior_fix <- colSums(postprob)
 
 
-  fix_position <- which(binary_fixed[which.max(posterior_fix),]==1)
-  random_position <- which(binary_random[which.max(posterior_random),]==1)
+  #fix_position <- which(binary_fixed[which.max(posterior_fix),]==1)
+  #random_position <- which(binary_random[which.max(posterior_random),]==1)
 
   ###output###
-  #bestmodel
-  BestModel <- list()
-  names(fix_position)<-NULL
-  names(random_position)<-NULL
-  BestModel$covariate_inclusion <- fix_position
-  BestModel$random_effect_inclusion <- random_position
 
   #table of models' posterior probabilities
   PosteriorProb <- PosteriorProb[order(PosteriorProb[,K+Q+1],decreasing=TRUE),]
   PosteriorProb <- as.data.frame(PosteriorProb)
-  PosteriorProb$p <- round(PosteriorProb$p,3)
+  PosteriorProb$MPP <- round(PosteriorProb$MPP,3)
 
   indices <- apply(PosteriorProb[,1:(K+Q)],2,function(x){which(x==1)})
   margin_prob <- apply(indices,2,function(x){sum(PosteriorProb[x,K+Q+1])})
   #table for fixed effects
   FixedEffect <- matrix(NA, ncol = 3, nrow = K)
   rownames(FixedEffect) <- paste("x",1:K,sep = "")
-  colnames(FixedEffect) <- c("Est","SD","p")
+  colnames(FixedEffect) <- c("Est","SD","PIP")
   FixedEffect[,1] <- PL_est$est[1:K]
   FixedEffect[,2] <- PL_est$sd[1:K]
   FixedEffect[,3] <- margin_prob[1:K]
@@ -380,7 +376,7 @@ GLMMselect <- function(Y, X, Sigma, Z, family, prior, offset=NULL, NumofModel=10
   #table for random effects
   RandomEffect <- matrix(NA, ncol = 3, nrow = Q)
   rownames(RandomEffect) <- paste("r",1:Q,sep = "")
-  colnames(RandomEffect) <- c("Est","SD","p")
+  colnames(RandomEffect) <- c("Est","SD","PIP")
   RandomEffect[,1] <- PL_est$est[(1+K):(Q+K)]
   RandomEffect[,2] <- PL_est$sd[(1+K):(Q+K)]
   RandomEffect[,3] <- margin_prob[(1+K):(Q+K)]
@@ -391,6 +387,17 @@ GLMMselect <- function(Y, X, Sigma, Z, family, prior, offset=NULL, NumofModel=10
   if(NumofModel <= (2^K*2^Q)){
     PosteriorProb <- PosteriorProb[1:NumofModel,]
   }
+
+
+  #bestmodel
+  BestModel <- list()
+  fix_position <- which(margin_prob[1:K]>pip_fixed)
+  random_position <- which(margin_prob[(1+K):(Q+K)]>pip_random)
+  names(fix_position)<-NULL
+  names(random_position)<-NULL
+  BestModel$covariate_inclusion <- fix_position
+  BestModel$random_effect_inclusion <- random_position
+
 
   return(list(BestModel=BestModel, PosteriorProb=PosteriorProb, FixedEffect=FixedEffect, RandomEffect=RandomEffect))
 

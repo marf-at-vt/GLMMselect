@@ -4,7 +4,18 @@
 \alias{GLMMselect}
 \title{Bayesian model selection method for generalized linear mixed models}
 \usage{
-GLMMselect(Y, X, Sigma, Z, family, prior, offset = NULL, NumofModel = 10)
+GLMMselect(
+  Y,
+  X,
+  Sigma,
+  Z,
+  family,
+  prior,
+  offset = NULL,
+  NumofModel = 10,
+  pip_fixed = 0.9,
+  pip_random = 0.5
+)
 }
 \arguments{
 \item{Y}{A numeric vector of observations.}
@@ -22,6 +33,10 @@ GLMMselect(Y, X, Sigma, Z, family, prior, offset = NULL, NumofModel = 10)
 \item{offset}{This can be used to specify an a priori known component to be included in the linear predictor during fitting. This should be NULL or a numeric vector of length equal to the number of observations.}
 
 \item{NumofModel}{The number of models with the largest posterior probabilities being printed out.}
+
+\item{pip_fixed}{The cutoff that if the posterior inclusion probability of fixed effects is larger than it, the fixed effects will be included in the best model.}
+
+\item{pip_random}{The cutoff that if the posterior inclusion probability of random effects is larger than it, the random effects will be included in the best model.}
 }
 \value{
 A list of the indices of covariates and random effects which are in the best model.
