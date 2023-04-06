@@ -2,11 +2,11 @@ Package: GLMMselect
 Title: Bayesian model selection method for generalized linear mixed models
 Version: 1.0.0
 Authors@R: c(
-    person("Shuangshuang", "Xu", , "xshuangshuang@vt.edu", role = c("aut", "cre")),
-    person("Marco", "Ferreira", , "marf@vt.edu", role = c("aut"),
+    person("Shuangshuang", "Xu", email = "xshuangshuang@vt.edu", role = c("aut", "cre")),
+    person("Marco", "Ferreira", email = "marf@vt.edu", role = c("aut"),
            comment = c(ORCID = "0000-0002-4705-5661")),
-    person("Erica", "Porter", , "ericamp@vt.edu", role = c("aut")),
-    person("Christopher", "Franck", , "chfranck@vt.edu", role = c("aut")))
+    person("Erica", "Porter", email = "ericamp@vt.edu", role = c("aut")),
+    person("Christopher", "Franck", email = "chfranck@vt.edu", role = c("aut")))
 Description: A Bayesian model selection approach for generalized linear mixed models (GLMMselect).
     Currently, GLMMselect can be used for Poisson GLMM and Bernoulli GLMM. GLMMselect can select fixed effects and random effects simultaneously. 
     Covariance structures for the random effects are a product of a unknown scalar and a known semi-positive definite matrix.

@@ -13,7 +13,7 @@ GLMMselect(
   prior,
   offset = NULL,
   NumofModel = 10,
-  pip_fixed = 0.9,
+  pip_fixed = 0.5,
   pip_random = 0.5
 )
 }
