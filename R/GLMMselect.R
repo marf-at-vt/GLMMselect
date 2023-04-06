@@ -74,13 +74,13 @@ pseudo_likelihood <- function(Y, X, Sigma, Z, family, offset=NULL){
       D <- eign$values
       D_inv <- 1/D
       D_inv[!is.finite(D_inv)] <- 0
-      X1.tilde <- t(P)%*%X1  # t(P) %*% (1 X)
+      X1.tilde <- t(P)%*%X1
 
       re.tilde <- t(P)%*%y_star-X1.tilde%*%Beta
 
-      l <- (+0.5*sum(log(D_inv))   #log(det(H))
-            -0.5*determinant(t(X1.tilde)%*%(D_inv*X1.tilde), logarithm=TRUE)$modulus[1] #t(X) %*% inv_H %*% X = t(X.tilde) %*% D_inv %*% X.tilde
-            -0.5*sum(re.tilde^2*D_inv)) # (y-Xbeta)invH(y-Xbeta)
+      l <- (+0.5*sum(log(D_inv))
+            -0.5*determinant(t(X1.tilde)%*%(D_inv*X1.tilde), logarithm=TRUE)$modulus[1]
+            -0.5*sum(re.tilde^2*D_inv))
       return(-l)
     }
 
@@ -107,10 +107,9 @@ pseudo_likelihood <- function(Y, X, Sigma, Z, family, offset=NULL){
     D_inv_xdx[!is.finite(D_inv_xdx)] <- 0
     inv_xdx <- P_xdx%*%(D_inv_xdx*t(P_xdx))
     Beta <- inv_xdx%*%t(X1.tilde)%*%matrix(D_inv*y.tilde,ncol = 1)
-    re.tilde <- y.tilde-X1.tilde%*%Beta   #t(P)%*%(y_star-XBeta)
+    re.tilde <- y.tilde-X1.tilde%*%Beta
 
     Alpha <- mapply(function(x,y,z){x*y%*%t(z)%*%P%*%matrix(D_inv*re.tilde,ncol=1)}, Kappa, Sigma, Z, SIMPLIFY = FALSE)
-    #Kappa*kinship%*%t(Z)%*%inv_H%*%(y_star-XBeta)
 
   }
 
@@ -261,7 +260,7 @@ FBF <- function(y_star, Xc, inv_v, Zc, Sigmac, prior,b, K){
 #' @param pip_random The cutoff that if the posterior inclusion probability of random effects is larger than it, the random effects will be included in the best model.
 #' @returns A list of the indices of covariates and random effects which are in the best model.
 #' @export
-GLMMselect <- function(Y, X, Sigma, Z, family, prior, offset=NULL, NumofModel=10, pip_fixed=0.9, pip_random=0.5){
+GLMMselect <- function(Y, X, Sigma, Z, family, prior, offset=NULL, NumofModel=10, pip_fixed=0.5, pip_random=0.5){
 
   if(sum(family %in% c("poisson","bernoulli")) == 0){
     stop("family must be either poisson or bernoulli.")
@@ -347,12 +346,6 @@ GLMMselect <- function(Y, X, Sigma, Z, family, prior, offset=NULL, NumofModel=10
     }
   }
 
-  #posterior_random <- rowSums(postprob)
-  #posterior_fix <- colSums(postprob)
-
-
-  #fix_position <- which(binary_fixed[which.max(posterior_fix),]==1)
-  #random_position <- which(binary_random[which.max(posterior_random),]==1)
 
   ###output###
 

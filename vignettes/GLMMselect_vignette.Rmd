@@ -127,13 +127,13 @@ lip_cancer_output$RandomEffect
 ```
 
 
-# See more
+# See also
 
-`ref.ICAR` provides an objective Bayesian approach for modeling spatially correlated areal data using an intrinsic conditional autoregressive prior on a vector of spatial random effects. Does ref.ICAR package do model selection for Gaussian data?
+`ref.ICAR` provides an objective Bayesian approach for modeling spatially correlated areal data using an intrinsic conditional autoregressive prior on a vector of spatial random effects. 
 
 # Reference
 
-Xu, Shuangshuang, Ferreira, M. A. R., Porter, E. M., and Franck, C. T. (202X). GLMMselect: Bayesian Model Selection for Generalized Linear Mixed Models, Biometrics under review.
+Xu, Shuangshuang, Ferreira, M. A. R., Porter, E. M., and Franck, C. T. (202X).  Bayesian Model Selection for Generalized Linear Mixed Models, Biometrics, under review.
 
 
 
