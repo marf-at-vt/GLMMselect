@@ -319,9 +319,6 @@ GLMMselect <- function(Y, X, Sigma, Z, family, prior, offset=NULL, NumofModel=10
     stop("Z must be numeric.")
   }
 
-  if(family == "bernoulli"){
-    family = "binominal"
-  }
 
   N <- length(Y)
   X1 <- cbind(1,X)
