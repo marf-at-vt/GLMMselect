@@ -2,7 +2,7 @@
 % Please edit documentation in R/GLMMselect.R
 \name{GLMMselect}
 \alias{GLMMselect}
-\title{Bayesian model selection method for generalized linear mixed models}
+\title{GLMMselect: Bayesian model selection method for generalized linear mixed models}
 \usage{
 GLMMselect(
   Y,
@@ -42,5 +42,14 @@ GLMMselect(
 A list of the indices of covariates and random effects which are in the best model.
 }
 \description{
-Bayesian model selection method for generalized linear mixed models
+GLMMselect: Bayesian model selection method for generalized linear mixed models
+}
+\examples{
+
+library(GLMMselect)
+\donttest{
+data("Y");data("X");data("Z");data("Sigma")
+Model_selection_output <- GLMMselect(Y=Y, X=X, Sigma=Sigma,
+                         Z=Z, family="poisson", prior="AR", offset=NULL)
+}
 }

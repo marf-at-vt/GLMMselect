@@ -81,3 +81,4 @@
 #' @format ## `lipcancer_Sigma`
 #' A list of covariance matrices for random effects.
 "lipcancer_Sigma"
+
